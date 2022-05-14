@@ -1,7 +1,5 @@
 import cv2
 import numpy as np
-from knn import question
-import tensorpack
 
 cap = cv2.VideoCapture(0)
 imgTarget = cv2.imread('Capture.jpg')
