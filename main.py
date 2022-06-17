@@ -2,35 +2,35 @@ import cv2
 import numpy as np
 
 cap = cv2.VideoCapture(0)
-imgTarget = cv2.imread('Capture.jpg')
-imgVideo = cv2.imread('Capture.jpg')
+imgTarget = cv2.imread('Capture.jpg')  # positioning images
+imgVideo = cv2.imread('Capture.jpg')  # showing images
 
-# success, imgVideo = myVid.read()
-hT, wT, cT = imgTarget.shape
-imgVideo = cv2.resize(imgVideo, (wT, hT))
+# success, imgVideo = myVid.read()  # debug
+hT, wT, cT = imgTarget.shape  # get the height(hT), width(wT), color(cT) variables from imgTarget
+imgVideo = cv2.resize(imgVideo, (wT, hT))  # resize imgVideo to imgTarget
 
-orb = cv2.ORB_create(nfeatures=2000)
+orb = cv2.ORB_create(nfeatures=2000)  # nfeatures=2000 can have the best positioning
 kp1, des1 = orb.detectAndCompute(imgTarget, None)
-# imgTarget = cv2.drawKeypoints(imgTarget, kp1, None)
+# imgTarget = cv2.drawKeypoints(imgTarget, kp1, None)  # debug
 
-while True:
+while True:  # loop until user choose to exit
+    # sample code view https://docs.opencv.org/4.x/dc/dc3/tutorial_py_matcher.html
     success, imgWebcam = cap.read()
     imgAug = imgWebcam.copy()
     kp2, des2 = orb.detectAndCompute(imgWebcam, None)
-    # imgWebcam = cv2.drawKeypoints(imgWebcam, kp2, None)
+    # imgWebcam = cv2.drawKeypoints(imgWebcam, kp2, None)  # debug
 
     bf = cv2.BFMatcher()
-    # sample code view https://docs.opencv.org/4.x/dc/dc3/tutorial_py_matcher.html
     matches = bf.knnMatch(des1, des2, k=2)
     good = []
     for m, n in matches:
         if m.distance < 0.75 * n.distance:
             good.append(m)
-    print(len(good))
+    # print(len(good))  # debug
     imgFeatures = cv2.drawMatches(imgTarget, kp1, imgWebcam, kp2, good, None,
                                   flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
 
-    if len(good) > 30:
+    if len(good) > 30:  # if 30 out of 2000 points matched then generate imgVideo
         srcPts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
         dstPts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
         matrix, mask = cv2.findHomography(srcPts, dstPts, cv2.RANSAC, 5)
